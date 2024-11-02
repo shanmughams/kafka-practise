@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  zookeeper:
+    image: wurstmeister/zookeeper:latest
+    ports:
+      - "2181:2181"
+    networks:
+      - kafka-network
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+
+  kafka-1:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9091:9092"  # Host port 9091 mapped to container port 9092
+    networks:
+      - kafka-network
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-1:9092,OUTSIDE://localhost:9091
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9092,OUTSIDE://0.0.0.0:9091  # Ensure OUTSIDE is mapped to a different port
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 1
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+  kafka-2:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9092:9092"  # Host port 9092 mapped to container port 9092
+    networks:
+      - kafka-network
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-2:9093,OUTSIDE://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9093,OUTSIDE://0.0.0.0:9092  # Ensure OUTSIDE is mapped to a different port
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 2
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+  kafka-3:
+    image: wurstmeister/kafka:latest
+    ports:
+      - "9093:9092"  # Host port 9093 mapped to container port 9092
+    networks:
+      - kafka-network
+    environment:
+      KAFKA_ADVERTISED_LISTENERS: INSIDE://kafka-3:9094,OUTSIDE://localhost:9093
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INSIDE:PLAINTEXT,OUTSIDE:PLAINTEXT
+      KAFKA_LISTENERS: INSIDE://0.0.0.0:9094,OUTSIDE://0.0.0.0:9093  # Ensure OUTSIDE is mapped to a different port
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_BROKER_ID: 3
+      KAFKA_INTER_BROKER_LISTENER_NAME: INSIDE
+
+networks:
+  kafka-network:
+    driver: bridge
